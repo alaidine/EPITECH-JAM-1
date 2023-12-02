@@ -7,71 +7,147 @@
 ##
 import pygame
 import sys
+from move import *
 
-# Plateau
+# Plateau settings
 SIZE = WIDTH, HEIGHT = 800, 800
 ROWS, COLS = 8, 8
 SQUARE_SIZE = HEIGHT // ROWS
-# Couleurs
+# Couleur
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 DBROWN = (100, 45, 0)
 LBROWN = (245, 190, 100)
 
-class Token:    # Definie la classe Token
-    def __init__(self, row, col, color):    # Initialisation de Token
+#Plateau
+board = [
+    [1, 0, 1, 0, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 2, 0, 2, 0, 2, 0, 2],
+    [2, 0, 2, 0, 2, 0, 2, 0],
+    [0, 2, 0, 2, 0, 2, 0, 2]
+]
+
+class Token:
+    def __init__(self, row, col, color):
         self.row = row
         self.col = col
         self.color = color
 
-    def draw(self, window): # Fonction dessine Token
-        pygame.draw.circle(window, self.color, (self.col * SQUARE_SIZE + SQUARE_SIZE // 2, self.row * SQUARE_SIZE + SQUARE_SIZE // 2), SQUARE_SIZE // 2 - 10)   # Dessine le cercle
-
-class Checkerboard: # Definie la classe Checkerboard
-    def __init__(self): # Inisialisation de Checkboard
-        self.board = [[None] * COLS for line in range(ROWS)]   # Plateau = tableau 2D (8x8)
+class Checkerboard:
+    def __init__(self):
+        self.board = [[None] * COLS for _ in range(ROWS)] # Création tableau 2D 8*8
         self.populate_board()
 
-    def populate_board(self):   # Fonction pour placer les pions
-        for row in range(ROWS): #
+    def populate_board(self): # Position initial des pions
+        for row in range(ROWS):
             for col in range(COLS):
                 if (row + col) % 2 == 1 and row < 3:
                     self.board[row][col] = Token(row, col, BLACK)
                 elif (row + col) % 2 == 1 and row > 4:
                     self.board[row][col] = Token(row, col, WHITE)
 
-    def draw(self, window): # Fonction pour dessiner le board
+    def draw_board(self, window): # Dessine le plateau
         for row in range(ROWS):
             for col in range(COLS):
-                color = LBROWN if (row + col) % 2 == 0 else DBROWN  # Definie la couleur: light_brown sinon dark_brown
-                pygame.draw.rect(window, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))   # Dessine le carré
-                token = self.board[row][col]
-                if token:
-                    token.draw(window)
+                color = LBROWN if (row + col) % 2 == 0 else DBROWN
+                pygame.draw.rect(window, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
-def draw_circle(window):
-    pygame.draw.circle(window, WHITE, (50, 50), 40.0)
+def get_pos(mouse_pos): # Convertie la position du click de la souris en coordonnée du carré
+    return [int(mouse_pos[0] * COLS / 800), int(mouse_pos[1] * ROWS / 800)]
+
+def check_winner(board): # Vérifie si il y a un gagnant
+    l = 0
+    c = 0
+    noir = 0
+    blanc = 0
+
+    while l < 8:
+        while c < 8:
+            if board[l][c] == 1:
+                noir += 1
+            if board[l][c] == 2:
+                blanc += 1
+            c += 1
+        l += 1
+        c =0
+    if noir == 0 or blanc == 0:
+        return 0
+    return 1
+
+def draw_token(window, board): # Dessine le pion
+    l = 0
+    c = 0
+    mid = 50
+    while (l < ROWS):
+        while (c < COLS):
+            if (board[l][c] == 1):
+                x = mid + 100 * c
+                y = mid + 100 * l
+                pygame.draw.circle(window, BLACK, (x, y), SQUARE_SIZE // 2 - 10)
+            if (board[l][c] == 2):
+                x = mid + 100 * c
+                y = mid + 100 * l
+                pygame.draw.circle(window, WHITE, (x, y), SQUARE_SIZE // 2 - 10)
+            c += 1
+        l += 1
+        c = 0
 
 def main():
-    # Pygame setup
-    pygame.init() # Initialisation
-    window = pygame.display.set_mode(SIZE) # Taille window
-    pygame.display.set_caption("Checkers") # Titre window
+    pygame.init()
+    window = pygame.display.set_mode(SIZE)
+    pygame.display.set_caption("Checkers")
     clock = pygame.time.Clock()
     checkerboard = Checkerboard()
     running = True
+    selected = None
+    clicked = None
+    action = 0
+    turn_player = 1
 
     while running:
+        # EVENT
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:   # Si event == quit:
-                running = False # Arrete boucle inf
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN and action == 0:
+                mouse_pos = event.pos
+                board_mouse_pos = get_pos(mouse_pos)
+                selected = True
+            if event.type == pygame.MOUSEBUTTONDOWN and action == 1:
+                click_pos = event.pos
+                board_click_pos = get_pos(click_pos)
+                selected = False
+                clicked = True
 
-        # RENDU DU JEU
-        window.fill(BLACK) # Couleur fond window
-        checkerboard.draw(window); # Dessine le plateau
-        pygame.display.flip() # Affiche window
-        clock.tick(60) # Limite 60FPS
+        if selected == True:
+            action = 1
+        if selected == False and clicked == True:
+            if turn_player == 1 and move_type_black(board, board_mouse_pos, board_click_pos) > 0:
+                move_black(board, board_click_pos, board_mouse_pos)
+                turn_player = 2
+            elif turn_player == 2 and move_type_white(board, board_mouse_pos, board_click_pos) > 0:
+                move_white(board, board_click_pos, board_mouse_pos)
+                turn_player = 1
+            selected = None
+            clicked = None
+            action = 0
 
-    pygame.quit() # Ferme la window
+        if check_winner(board) == 0: # Si il y a un gagnant -> ferme la fenêtre
+            running = False
+
+        # Rendu du jeu
+        window.fill(BLACK)
+        checkerboard.draw_board(window)
+        draw_token(window, board)
+        if selected == True:
+            pygame.draw.circle(window, "yellow", mouse_pos, 25)
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()
 
 main()
