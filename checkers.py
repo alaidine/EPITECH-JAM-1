@@ -42,7 +42,7 @@ def main():
                 running = False # Arrete boucle inf
 
         # RENDU DU JEU
-        window.fill("black") # Couleur window
+        window.fill("black") # Couleur fond window
         Checkerboard.draw(window);
         pygame.display.flip() # Affiche window
         clock.tick(60) # Limite 60FPS
