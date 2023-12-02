@@ -53,7 +53,7 @@ class Checkerboard:
     def draw_board(self, window): # Dessine le plateau
         for row in range(ROWS):
             for col in range(COLS):
-                color = LBROWN if (row + col) % 2 == 0 else DBROWN
+                color = DBROWN if (row + col) % 2 == 0 else LBROWN
                 pygame.draw.rect(window, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 def get_pos(mouse_pos): # Convertie la position du click de la souris en coordonnée du carré
