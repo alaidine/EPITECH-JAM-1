@@ -6,7 +6,6 @@
 ## checkers
 ##
 import pygame
-import sys
 import copy
 from move import *
 
@@ -14,11 +13,19 @@ from move import *
 SIZE = WIDTH, HEIGHT = 800, 800
 ROWS, COLS = 8, 8
 SQUARE_SIZE = HEIGHT // ROWS
+
+# Mode
+MENU_MODE = 0
+GAME_MODE = 1
+RULES_MODE = 2
+
 # Couleur
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
 DBROWN = (100, 45, 0)
 LBROWN = (245, 190, 100)
+RED = (215, 0, 0)
+BLUE = (0, 140, 215)
+
+turn = ["", "Black", "White"]
 
 #Plateau
 board = [
@@ -77,7 +84,7 @@ def draw_token(window, board): # Dessine le pion
                 y = mid + SQUARE_SIZE * row
                 pygame.draw.circle(window, BLUE, (x, y), SQUARE_SIZE // 2 - 10)
 
-def make_king():
+def make_queen():    # Fait une reines
     for row in range(ROWS):
         for col in range(COLS):
             if (board[0][col] == 2):
@@ -163,6 +170,8 @@ def main():
                 board_click_pos = get_pos(click_pos)
                 selected = False
                 clicked = True
+
+                ########    EVENT UNDO/REDO    ########
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_u:
                     undo(board, positions)
@@ -198,9 +207,11 @@ def main():
             running = False
 
         # Rendu du jeu
-        window.fill(BLACK)
+        window.fill("black")
         draw_board(window)
+        make_queen()
         draw_token(window, board)
+        pygame.draw.rect(window, turn[turn_player], (750, 375, 50, 50))
         if selected == True:
             circle_selection(window, mouse_pos)
         pygame.display.flip()
