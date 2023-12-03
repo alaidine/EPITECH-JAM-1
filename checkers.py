@@ -46,6 +46,9 @@ positions = [
     ],
 ]
 
+#Historique des undo
+undos = []
+
 class Token:
     def __init__(self, row, col, color):
         self.row = row
@@ -122,16 +125,18 @@ def swap_boards(board, position):
             board[i][j] = position[i][j]
 
 def undo(board, positions):
-    for i in range(len(positions) - 1, 0, -1):
-        if board == positions[i] and i > 0:
-            swap_boards(board, positions[i - 1])
-            return
+    if len(positions) == 1:
+        return
+    undos.append(positions[-1])
+    swap_boards(board, positions[-2])
+    positions.pop()
 
 def redo(board, positions):
-    for i in range(len(positions) - 1, -1, -1):
-        if board == positions[i] and i < (len(positions) - 1):
-            swap_boards(board, positions[i + 1])
-            return
+    if len(undos) == 0:
+        return
+    positions.append(undos[-1])
+    swap_boards(board, positions[-1])
+    undos.pop()
 
 def main():
     pygame.init()
@@ -180,10 +185,12 @@ def main():
                 move_black(board, board_click_pos, board_mouse_pos)
                 turn_player = 2
                 positions.append(copy.deepcopy(board))
+                undos.clear()
             elif turn_player == 2 and move_type_white(board, board_mouse_pos, board_click_pos) > 0:
                 move_white(board, board_click_pos, board_mouse_pos)
                 turn_player = 1
                 positions.append(copy.deepcopy(board))
+                undos.clear()
             selected = None
             clicked = None
             action = 0
