@@ -13,9 +13,8 @@ from move import *
 SIZE = WIDTH, HEIGHT = 800, 800
 ROWS, COLS = 8, 8
 SQUARE_SIZE = HEIGHT // ROWS
+
 # Couleur
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
 DBROWN = (100, 45, 0)
 LBROWN = (245, 190, 100)
 
@@ -31,77 +30,64 @@ board = [
     [0, 2, 0, 2, 0, 2, 0, 2]
 ]
 
-class Token:
-    def __init__(self, row, col, color):
-        self.row = row
-        self.col = col
-        self.color = color
+# Initialisation fenêtre
+pygame.init()
+window = pygame.display.set_mode(SIZE)
+pygame.display.set_caption("Checkers")
+clock = pygame.time.Clock()
 
-class Checkerboard:
-    def __init__(self):
-        self.board = [[None] * COLS for _ in range(ROWS)] # Création tableau 2D 8*8
-        self.populate_board()
+def draw_board(window): # Dessine le plateau
+    for row in range(ROWS):
+        for col in range(COLS):
+            color = DBROWN if (row + col) % 2 == 0 else LBROWN
+            pygame.draw.rect(window, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
-    def populate_board(self): # Position initial des pions
-        for row in range(ROWS):
-            for col in range(COLS):
-                if (row + col) % 2 == 1 and row < 3:
-                    self.board[row][col] = Token(row, col, BLACK)
-                elif (row + col) % 2 == 1 and row > 4:
-                    self.board[row][col] = Token(row, col, WHITE)
-
-    def draw_board(self, window): # Dessine le plateau
-        for row in range(ROWS):
-            for col in range(COLS):
-                color = DBROWN if (row + col) % 2 == 0 else LBROWN
-                pygame.draw.rect(window, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+def draw_token(window, board): # Dessine le pion
+    row = 0
+    col = 0
+    mid = SQUARE_SIZE // 2
+    while (row < ROWS):
+        while (col < COLS):
+            if (board[row][col] == 1):
+                x = mid + SQUARE_SIZE * col
+                y = mid + SQUARE_SIZE * row
+                pygame.draw.circle(window, "black", (x, y), SQUARE_SIZE // 2 - 10)
+            if (board[row][col] == 2):
+                x = mid + SQUARE_SIZE * col
+                y = mid + SQUARE_SIZE * row
+                pygame.draw.circle(window, "white", (x, y), SQUARE_SIZE // 2 - 10)
+            col += 1
+        row += 1
+        col = 0
 
 def get_pos(mouse_pos): # Convertie la position du click de la souris en coordonnée du carré
-    return [int(mouse_pos[0] * COLS / 800), int(mouse_pos[1] * ROWS / 800)]
+    return [int(mouse_pos[0] * COLS / WIDTH), int(mouse_pos[1] * ROWS / HEIGHT)]
 
 def check_winner(board): # Vérifie si il y a un gagnant
-    l = 0
-    c = 0
+    row = 0
+    col = 0
     noir = 0
     blanc = 0
-
-    while l < 8:
-        while c < 8:
-            if board[l][c] == 1:
+    while (row < ROWS):
+        while (col < COLS):
+            if board[row][col] == 1:
                 noir += 1
-            if board[l][c] == 2:
+            if board[row][col] == 2:
                 blanc += 1
-            c += 1
-        l += 1
-        c =0
+            col += 1
+        row += 1
+        col =0
     if noir == 0 or blanc == 0:
         return 0
     return 1
 
-def draw_token(window, board): # Dessine le pion
-    l = 0
-    c = 0
-    mid = 50
-    while (l < ROWS):
-        while (c < COLS):
-            if (board[l][c] == 1):
-                x = mid + 100 * c
-                y = mid + 100 * l
-                pygame.draw.circle(window, BLACK, (x, y), SQUARE_SIZE // 2 - 10)
-            if (board[l][c] == 2):
-                x = mid + 100 * c
-                y = mid + 100 * l
-                pygame.draw.circle(window, WHITE, (x, y), SQUARE_SIZE // 2 - 10)
-            c += 1
-        l += 1
-        c = 0
+def make_king():
+    for row in range(ROWS):
+        for col in range(COLS):
+            if (board[0][col] == 2):
+                return 0
 
 def main():
-    pygame.init()
-    window = pygame.display.set_mode(SIZE)
-    pygame.display.set_caption("Checkers")
-    clock = pygame.time.Clock()
-    checkerboard = Checkerboard()
     running = True
     selected = None
     clicked = None
@@ -111,8 +97,12 @@ def main():
     while running:
         # EVENT
         for event in pygame.event.get():
+
+            # Fermer la fenêtre
             if event.type == pygame.QUIT:
                 running = False
+
+            # Event souris
             if event.type == pygame.MOUSEBUTTONDOWN and action == 0:
                 mouse_pos = event.pos
                 board_mouse_pos = get_pos(mouse_pos)
@@ -140,8 +130,8 @@ def main():
             running = False
 
         # Rendu du jeu
-        window.fill(BLACK)
-        checkerboard.draw_board(window)
+        window.fill("black")
+        draw_board(window)
         draw_token(window, board)
         if selected == True:
             pygame.draw.circle(window, "yellow", mouse_pos, 25)
