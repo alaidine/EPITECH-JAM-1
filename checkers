@@ -175,10 +175,6 @@ def main():
                         turn_player = 1
                 if event.key == pygame.K_r:
                     redo(board, positions)
-                    if turn_player == 1:
-                        turn_player = 2
-                    elif turn_player == 2:
-                        turn_player = 1
 
         if selected == True:
             action = 1
