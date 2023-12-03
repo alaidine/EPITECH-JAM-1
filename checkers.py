@@ -121,16 +121,9 @@ def swap_boards(board, position):
         for j in range(0, len(board[0]) - 1, 1):
             board[i][j] = position[i][j]
 
-def compare_boards(board, position):
-    for i in range(0, len(board) - 1, 1):
-        for j in range(0, len(board[0]) - 1, 1):
-            if board[i][j] != position[i][j]:
-                return False
-    return True
-
 def undo(board, positions):
     for i in range(len(positions) - 1, 0, -1):
-        if compare_boards(board, positions[i]) and i > 0:
+        if board == positions[i] and i > 0:
             swap_boards(board, positions[i - 1])
             return
 
