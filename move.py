@@ -132,17 +132,27 @@ def move_white_queen(board, pos, click):
     cx, cy = click[0], click[1]
     vec = (x - cx, y - cy)
 
+    sign_x = -1 if vec[0] < 0 else 1
+    sign_y = -1 if vec[1] < 0 else 1
     if abs(vec[0]) != abs(vec[1]) or board[y][x] > 0:
         return
     board[cy][cx] = 0
     board[y][x] = 4
+    for i in range(0, abs(vec[0]), 1):
+        if board[cy + (i * sign_y)][cx + (i * sign_x)] == 1 or board[cy + (i * sign_y)][cx + (i * sign_x)] == 3:
+            board[cy + (i * sign_y)][cx + (i * sign_x)] = 0
 
 def move_black_queen(board, pos, click):
     x, y = pos[0], pos[1]
     cx, cy = click[0], click[1]
-    vec = (cx - x, cy - y)
+    vec = (x - cx, y - cy)
 
+    sign_x = -1 if vec[0] < 0 else 1
+    sign_y = -1 if vec[1] < 0 else 1
     if abs(vec[0]) != abs(vec[1]) or board[y][x] > 0:
         return
     board[cy][cx] = 0
     board[y][x] = 3
+    for i in range(0, abs(vec[0]), 1):
+        if board[cy + (i * sign_y)][cx + (i * sign_x)] == 2 or board[cy + (i * sign_y)][cx + (i * sign_x)] == 4:
+            board[cy + (i * sign_y)][cx + (i * sign_x)] = 0
