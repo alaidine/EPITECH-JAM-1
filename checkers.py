@@ -120,8 +120,8 @@ def print_position(position):
     print("")
 
 def swap_boards(board, position):
-    for i in range(0, len(board) - 1, 1):
-        for j in range(0, len(board[0]) - 1, 1):
+    for i in range(0, len(board), 1):
+        for j in range(0, len(board[0]), 1):
             board[i][j] = position[i][j]
 
 def undo(board, positions):
