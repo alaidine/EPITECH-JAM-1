@@ -135,7 +135,7 @@ def undo(board, positions):
             return
 
 def redo(board, positions):
-    for i in range(len(positions) - 1, 0, -1):
+    for i in range(len(positions) - 1, -1, -1):
         if board == positions[i] and i < (len(positions) - 1):
             swap_boards(board, positions[i + 1])
             return
