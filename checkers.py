@@ -199,6 +199,15 @@ def main():
                 turn_player = 1
                 positions.append(copy.deepcopy(board))
                 undos.clear()
+            elif turn_player == 2 and board[board_mouse_pos[1]][board_mouse_pos[0]] == 4:
+                move_white_queen(board, board_click_pos, board_mouse_pos)
+                turn_player = 1
+                positions.append(copy.deepcopy(board))
+                undos.clear()
+            elif turn_player == 1 and board[board_mouse_pos[1]][board_mouse_pos[0]] == 3:
+                move_black_queen(board, board_click_pos, board_mouse_pos)
+                turn_player = 2
+                positions.append(copy.deepcopy(board))
             selected = None
             clicked = None
             action = 0
