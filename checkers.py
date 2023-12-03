@@ -19,6 +19,8 @@ SQUARE_SIZE = HEIGHT // ROWS
 MENU_MODE = 0
 GAME_MODE = 1
 RULES_MODE = 2
+CHOOSE_MODE = 3
+END_MODE = 4
 
 # Couleur
 DBROWN = (100, 45, 0)
@@ -31,6 +33,7 @@ pygame.init()
 WINDOW = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Checkers")
 
+
 # Pictures
 BACKGROUND = pygame.image.load("content/background.jpg").convert()
 PLAY_BUTTON = pygame.image.load("content/play.png").convert_alpha()
@@ -38,6 +41,9 @@ RULES_BUTTON = pygame.image.load("content/rules.png").convert_alpha()
 EXIT_BUTTON = pygame.image.load("content/exit.png").convert_alpha()
 RULES = pygame.image.load("content/Rules.jpg").convert()
 BACK_BUTTON = pygame.image.load("content/back.png").convert()
+SELECTION = pygame.image.load("content/Selection.jpg").convert()
+IA_BUTTON = pygame.image.load("content/IA.png").convert_alpha()
+PVP_BUTTON = pygame.image.load("content/PVP.png").convert_alpha()
 
 turn = ["", "Black", "White"]
 
@@ -159,6 +165,7 @@ def redo(board, positions):
 def main():
     CLOCK = pygame.time.Clock()
     RUNNING = True
+    PLAY_IA = False
     SELECTED = None
     CLICKED = None
     ACTION = 0
@@ -172,35 +179,50 @@ def main():
             if event.type == pygame.QUIT:
                 RUNNING = False
                     ############    MENU EVENT    ############
-            if event.type == pygame.MOUSEBUTTONUP and SET_MODE == 0:
+            if event.type == pygame.MOUSEBUTTONUP and SET_MODE == MENU_MODE:
                 if pygame.mouse.get_pos()[0] > 280 and pygame.mouse.get_pos()[0] < (280 + 200):
                     if pygame.mouse.get_pos()[1] > 450 and pygame.mouse.get_pos()[1] < (450 + 100):
-                        SET_MODE = 1
-            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == 0:
+                        SET_MODE = CHOOSE_MODE    # PLAY
+            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == MENU_MODE:
                 if pygame.mouse.get_pos()[0] > 280 and pygame.mouse.get_pos()[0] < (280 + 200):
                     if pygame.mouse.get_pos()[1] > 570 and pygame.mouse.get_pos()[1] < (570 + 100):
-                        SET_MODE = 2
-            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == 0:
+                        SET_MODE = RULES_MODE    # RULES
+            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == MENU_MODE:
                 if pygame.mouse.get_pos()[0] > 280 and pygame.mouse.get_pos()[0] < (280 + 200):
                     if pygame.mouse.get_pos()[1] > 690 and pygame.mouse.get_pos()[1] < (690 + 100):
-                        RUNNING = False
-                    ############    RULES EVENT    ############
-            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == 2:
+                        RUNNING = False # EXIT
+
+                    ############    CHOOSE MODE    ############
+            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == CHOOSE_MODE:
+                if pygame.mouse.get_pos()[0] > 220 and pygame.mouse.get_pos()[0] < (340 + 200):
+                    if pygame.mouse.get_pos()[1] > 220 and pygame.mouse.get_pos()[1] < (530 + 100):
+                        SET_MODE = GAME_MODE # IA
+            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == CHOOSE_MODE:
+                if pygame.mouse.get_pos()[0] > 220 and pygame.mouse.get_pos()[0] < (340 + 200):
+                    if pygame.mouse.get_pos()[1] > 220 and pygame.mouse.get_pos()[1] < (530 + 100):
+                        SET_MODE = GAME_MODE    # PVP
+            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == CHOOSE_MODE:
                 if pygame.mouse.get_pos()[0] > 600 and pygame.mouse.get_pos()[0] < (600 + 200):
                     if pygame.mouse.get_pos()[1] > 700 and pygame.mouse.get_pos()[1] < (700 + 100):
-                        RUNNING = True
+                        SET_MODE = MENU_MODE    # BACK
+
+                    ############    RULES EVENT    ############
+            if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == RULES_MODE:
+                if pygame.mouse.get_pos()[0] > 600 and pygame.mouse.get_pos()[0] < (600 + 200):
+                    if pygame.mouse.get_pos()[1] > 700 and pygame.mouse.get_pos()[1] < (700 + 100):
+                        RUNNING = True  # BACK
                         SET_MODE = 0
+
                     ############    GAME EVENT    ############
-            if event.type == pygame.MOUSEBUTTONDOWN and ACTION == 0 and SET_MODE == 1:
+            if event.type == pygame.MOUSEBUTTONDOWN and ACTION == 0 and SET_MODE == GAME_MODE:
                 mouse_pos = event.pos
                 board_mouse_pos = get_pos(mouse_pos)
                 SELECTED = True
-            if event.type == pygame.MOUSEBUTTONDOWN and ACTION == 1 and SET_MODE == 1:
+            if event.type == pygame.MOUSEBUTTONDOWN and ACTION == 1 and SET_MODE == GAME_MODE:
                 click_pos = event.pos
                 board_click_pos = get_pos(click_pos)
                 SELECTED = False
                 CLICKED = True
-
                 ########    EVENT UNDO/REDO    ########
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_u:
@@ -229,6 +251,16 @@ def main():
                 TURN_PLAYER = 1
                 positions.append(copy.deepcopy(board))
                 undos.clear()
+            elif TURN_PLAYER == 2 and board[board_mouse_pos[1]][board_mouse_pos[0]] == 4:
+                move_white_queen(board, board_click_pos, board_mouse_pos)
+                TURN_PLAYER = 1
+                positions.append(copy.deepcopy(board))
+                undos.clear()
+            elif TURN_PLAYER == 1 and board[board_mouse_pos[1]][board_mouse_pos[0]] == 3:
+                move_black_queen(board, board_click_pos, board_mouse_pos)
+                TURN_PLAYER = 2
+                positions.append(copy.deepcopy(board))
+                undos.clear()
             SELECTED = None
             CLICKED = None
             ACTION = 0
@@ -237,7 +269,7 @@ def main():
             RUNNING = False
 
         # Rendu du jeu
-        if SET_MODE == 1:
+        if SET_MODE == GAME_MODE:
             WINDOW.fill("black")
             draw_board(WINDOW)
             make_queen()
@@ -245,14 +277,20 @@ def main():
             pygame.draw.rect(WINDOW, turn[TURN_PLAYER], (750, 375, 50, 50))
             if SELECTED == True:
                 circle_selection(WINDOW, mouse_pos)
-        if SET_MODE == 0:
+        if SET_MODE == MENU_MODE:
             WINDOW.blit(BACKGROUND, (0, 0))
             WINDOW.blit(PLAY_BUTTON, (280, 450))
             WINDOW.blit(RULES_BUTTON, (280, 570))
             WINDOW.blit(EXIT_BUTTON, (280, 690))
-        if SET_MODE == 2:
+        if SET_MODE == RULES_MODE:
             WINDOW.blit(RULES, (0, 0))
             WINDOW.blit(BACK_BUTTON, (600, 700))
+        if SET_MODE == CHOOSE_MODE:
+            WINDOW.blit(SELECTION, (0, 0))
+            WINDOW.blit(IA_BUTTON, (220, 340))
+            WINDOW.blit(PVP_BUTTON, (220, 530))
+            WINDOW.blit(BACK_BUTTON, (600, 700))
+
         pygame.display.flip()
         CLOCK.tick(60)
     pygame.quit()
