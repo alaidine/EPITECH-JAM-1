@@ -7,6 +7,7 @@
 ##
 import pygame
 import sys
+import copy
 from move import *
 
 # Plateau settings
@@ -29,6 +30,20 @@ board = [
     [0, 2, 0, 2, 0, 2, 0, 2],
     [2, 0, 2, 0, 2, 0, 2, 0],
     [0, 2, 0, 2, 0, 2, 0, 2]
+]
+
+#Historique des positions
+positions = [
+    [
+        [1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0, 1, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 2, 0, 2, 0, 2, 0, 2],
+        [2, 0, 2, 0, 2, 0, 2, 0],
+        [0, 2, 0, 2, 0, 2, 0, 2]
+    ],
 ]
 
 class Token:
@@ -96,6 +111,35 @@ def draw_token(window, board): # Dessine le pion
         l += 1
         c = 0
 
+def print_position(position):
+    for line in position:
+        print(line)
+    print("")
+
+def swap_boards(board, position):
+    for i in range(0, len(board) - 1, 1):
+        for j in range(0, len(board[0]) - 1, 1):
+            board[i][j] = position[i][j]
+
+def compare_boards(board, position):
+    for i in range(0, len(board) - 1, 1):
+        for j in range(0, len(board[0]) - 1, 1):
+            if board[i][j] != position[i][j]:
+                return False
+    return True
+
+def undo(board, positions, turn_player):
+    for i in range(len(positions) - 1, 0, -1):
+        if compare_boards(board, positions[i]) and i > 0:
+            swap_boards(board, positions[i - 1])
+            return
+
+def redo(board, positions, turn_player):
+    for i in range(len(positions) - 1, 0, -1):
+        if board == positions[i] and i < (len(positions) - 1):
+            swap_boards(board, positions[i + 1])
+            return
+
 def main():
     pygame.init()
     window = pygame.display.set_mode(SIZE)
@@ -122,6 +166,11 @@ def main():
                 board_click_pos = get_pos(click_pos)
                 selected = False
                 clicked = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_u:
+                    undo(board, positions, turn_player)
+                if event.key == pygame.K_r:
+                    redo(board, positions, turn_player)
 
         if selected == True:
             action = 1
@@ -129,9 +178,11 @@ def main():
             if turn_player == 1 and move_type_black(board, board_mouse_pos, board_click_pos) > 0:
                 move_black(board, board_click_pos, board_mouse_pos)
                 turn_player = 2
+                positions.append(copy.deepcopy(board))
             elif turn_player == 2 and move_type_white(board, board_mouse_pos, board_click_pos) > 0:
                 move_white(board, board_click_pos, board_mouse_pos)
                 turn_player = 1
+                positions.append(copy.deepcopy(board))
             selected = None
             clicked = None
             action = 0
@@ -149,5 +200,6 @@ def main():
         clock.tick(60)
 
     pygame.quit()
+
 
 main()
