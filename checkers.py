@@ -44,6 +44,8 @@ BACK_BUTTON = pygame.image.load("content/back.png").convert()
 SELECTION = pygame.image.load("content/Selection.jpg").convert()
 IA_BUTTON = pygame.image.load("content/IA.png").convert_alpha()
 PVP_BUTTON = pygame.image.load("content/PVP.png").convert_alpha()
+REPLAY_BUTTON = pygame.image.load("content/replay.png").convert_alpha()
+WIN = pygame.image.load("content/Win.jpg").convert()
 
 turn = ["", "Black", "White"]
 
@@ -122,9 +124,9 @@ def check_winner(board): # Vérifie si il y a un gagnant
     blanc = 0
     for row in range(ROWS):
         for col in range(COLS):
-            if board[row][col] == 1:
+            if (board[row][col] == 1) or (board[row][col] == 3):
                 noir += 1
-            if board[row][col] == 2:
+            if (board[row][col] == 2) or (board[row][col] == 4):
                 blanc += 1
     if noir == 0 or blanc == 0:
         return 0
@@ -211,7 +213,16 @@ def main():
                 if pygame.mouse.get_pos()[0] > 600 and pygame.mouse.get_pos()[0] < (600 + 200):
                     if pygame.mouse.get_pos()[1] > 700 and pygame.mouse.get_pos()[1] < (700 + 100):
                         RUNNING = True  # BACK
-                        SET_MODE = 0
+                        SET_MODE = MENU_MODE
+                    ############    WIN EVENT    ############
+            if event.type == pygame.MOUSEBUTTONUP and SET_MODE == END_MODE:
+                if pygame.mouse.get_pos()[0] > 280 and pygame.mouse.get_pos()[0] < (280 + 200):
+                    if pygame.mouse.get_pos()[1] > 360 and pygame.mouse.get_pos()[1] < (360 + 100):
+                        SET_MODE = MENU_MODE
+            if event.type == pygame.MOUSEBUTTONUP and SET_MODE == END_MODE:
+                if pygame.mouse.get_pos()[0] > 280 and pygame.mouse.get_pos()[0] < (280 + 200):
+                    if pygame.mouse.get_pos()[1] > 570 and pygame.mouse.get_pos()[1] < (570+ 100):
+                        RUNNING = False
 
                     ############    GAME EVENT    ############
             if event.type == pygame.MOUSEBUTTONDOWN and ACTION == 0 and SET_MODE == GAME_MODE:
@@ -266,7 +277,7 @@ def main():
             ACTION = 0
 
         if check_winner(board) == 0: # Si il y a un gagnant -> ferme la fenêtre
-            RUNNING = False
+            SET_MODE = END_MODE
 
         # Rendu du jeu
         if SET_MODE == GAME_MODE:
@@ -290,6 +301,10 @@ def main():
             WINDOW.blit(IA_BUTTON, (220, 340))
             WINDOW.blit(PVP_BUTTON, (220, 530))
             WINDOW.blit(BACK_BUTTON, (600, 700))
+        if SET_MODE == END_MODE:
+            WINDOW.blit(WIN, (0, 0))
+            WINDOW.blit(REPLAY_BUTTON, (280, 360))
+            WINDOW.blit(EXIT_BUTTON, (280, 570))
 
         pygame.display.flip()
         CLOCK.tick(60)
