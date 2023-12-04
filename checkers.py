@@ -8,6 +8,7 @@
 import pygame
 import copy
 from move import *
+from ia import *
 
 
 # Plateau settings
@@ -196,13 +197,15 @@ def main():
 
                     ############    CHOOSE MODE    ############
             if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == CHOOSE_MODE:
-                if pygame.mouse.get_pos()[0] > 220 and pygame.mouse.get_pos()[0] < (340 + 200):
-                    if pygame.mouse.get_pos()[1] > 220 and pygame.mouse.get_pos()[1] < (530 + 100):
+                if pygame.mouse.get_pos()[0] > 220 and pygame.mouse.get_pos()[0] < (220 + 200):
+                    if pygame.mouse.get_pos()[1] > 340 and pygame.mouse.get_pos()[1] < (340 + 100):
                         SET_MODE = GAME_MODE # IA
+                        PLAY_IA = True
             if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == CHOOSE_MODE:
-                if pygame.mouse.get_pos()[0] > 220 and pygame.mouse.get_pos()[0] < (340 + 200):
-                    if pygame.mouse.get_pos()[1] > 220 and pygame.mouse.get_pos()[1] < (530 + 100):
+                if pygame.mouse.get_pos()[0] > 220 and pygame.mouse.get_pos()[0] < (220 + 200):
+                    if pygame.mouse.get_pos()[1] > 530 and pygame.mouse.get_pos()[1] < (530 + 100):
                         SET_MODE = GAME_MODE    # PVP
+                        PLAY_IA = False
             if event.type == pygame.MOUSEBUTTONDOWN and SET_MODE == CHOOSE_MODE:
                 if pygame.mouse.get_pos()[0] > 600 and pygame.mouse.get_pos()[0] < (600 + 200):
                     if pygame.mouse.get_pos()[1] > 700 and pygame.mouse.get_pos()[1] < (700 + 100):
@@ -218,11 +221,11 @@ def main():
             if event.type == pygame.MOUSEBUTTONUP and SET_MODE == END_MODE:
                 if pygame.mouse.get_pos()[0] > 280 and pygame.mouse.get_pos()[0] < (280 + 200):
                     if pygame.mouse.get_pos()[1] > 360 and pygame.mouse.get_pos()[1] < (360 + 100):
-                        SET_MODE = MENU_MODE
+                        SET_MODE = MENU_MODE    # REPLAY
             if event.type == pygame.MOUSEBUTTONUP and SET_MODE == END_MODE:
                 if pygame.mouse.get_pos()[0] > 280 and pygame.mouse.get_pos()[0] < (280 + 200):
                     if pygame.mouse.get_pos()[1] > 570 and pygame.mouse.get_pos()[1] < (570+ 100):
-                        RUNNING = False
+                        RUNNING = False # EXIT
 
                     ############    GAME EVENT    ############
             if event.type == pygame.MOUSEBUTTONDOWN and ACTION == 0 and SET_MODE == GAME_MODE:
@@ -257,12 +260,12 @@ def main():
                 TURN_PLAYER = 2
                 positions.append(copy.deepcopy(board))
                 undos.clear()
-            elif TURN_PLAYER == 2 and move_type_white(board, board_mouse_pos, board_click_pos) > 0:
+            elif TURN_PLAYER == 2 and move_type_white(board, board_mouse_pos, board_click_pos) > 0 and PLAY_IA == False:
                 move_white(board, board_click_pos, board_mouse_pos)
                 TURN_PLAYER = 1
                 positions.append(copy.deepcopy(board))
                 undos.clear()
-            elif TURN_PLAYER == 2 and board[board_mouse_pos[1]][board_mouse_pos[0]] == 4:
+            elif TURN_PLAYER == 2 and board[board_mouse_pos[1]][board_mouse_pos[0]] == 4 and PLAY_IA == False:
                 move_white_queen(board, board_click_pos, board_mouse_pos)
                 TURN_PLAYER = 1
                 positions.append(copy.deepcopy(board))
@@ -278,6 +281,12 @@ def main():
 
         if check_winner(board) == 0: # Si il y a un gagnant -> ferme la fenêtre
             SET_MODE = END_MODE
+        print(SET_MODE)
+        if TURN_PLAYER == 2 and PLAY_IA == True and SET_MODE == GAME_MODE:
+            if movement_type_ia(board) == False:
+                SET_MODE = END_MODE
+            TURN_PLAYER = 1
+
 
         # Rendu du jeu
         if SET_MODE == GAME_MODE:
